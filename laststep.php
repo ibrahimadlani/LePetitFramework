@@ -7,6 +7,11 @@ $_SESSION["option_fa"] = $_POST["option_fa"];
 $_SESSION["option_img"] = $_POST["option_img"];
 $_SESSION["option_index"] = $_POST["option_index"];
 
+if(isset($_POST["submit"])){
+  print_r($_POST);
+  print_r($_SESSION);
+}
+
 if (strlen($_POST["project_name"]) > 0) {
   $_SESSION["project_name"] = $_POST["project_name"];
 } else {
@@ -95,7 +100,7 @@ if (strlen($_POST["option_index"]) == NULL) {
     </header>
 
     <main class="px-3">
-      <form action="LePetitFramework.php" method="post">
+      <form action="inc/download.inc.php" method="POST">
         <h1 class="fw-bold text-start">Table informations</h1>
         <hr>
         <?php for ($i = 1; $i <= $_POST["table_number"]; $i++) { ?>
@@ -117,7 +122,7 @@ if (strlen($_POST["option_index"]) == NULL) {
         <?php } ?>
         <div class="">
           <a href="index.php" class="btn btn btn-outline-dark rounded-pill px-5  shadow-sm"><i class="fas fa-chevron-left"></i> Back</a>
-          <button type="sumbit" class="btn btn-warning rounded-pill px-5 shadow-sm"> Download <i class="fas fa-download"></i></button>
+          <button type="sumbit" name="submit" class="btn btn-warning rounded-pill px-5 shadow-sm"> Download <i class="fas fa-download"></i></button>
         </div>
       </form>
     </main>

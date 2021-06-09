@@ -23,22 +23,22 @@ foreach ($tables_rows as $key) {
 
 
 
-/*echo "<br>--------------------------<br>";
-echo "Nom du projet : " . $_SESSION["project_name"] . "<br>";
-echo "Nombre de table : " . $_SESSION["table_number"] . "<br>";
-echo "Nom de la BDD : " . $_SESSION["database_name"] . "<br>";
-echo "Nom de l'hôte: " . $_SESSION["database_hostname"] . "<br>";
-echo "Nom d'utilisateur : " . $_SESSION["database_username"] . "<br>";
-echo "Mot de passe : " . $_SESSION["database_password"] . "<br>";
+// echo "<br>--------------------------<br>";
+// echo "Nom du projet : " . $_SESSION["project_name"] . "<br>";
+// echo "Nombre de table : " . $_SESSION["table_number"] . "<br>";
+// echo "Nom de la BDD : " . $_SESSION["database_name"] . "<br>";
+// echo "Nom de l'hôte: " . $_SESSION["database_hostname"] . "<br>";
+// echo "Nom d'utilisateur : " . $_SESSION["database_username"] . "<br>";
+// echo "Mot de passe : " . $_SESSION["database_password"] . "<br>";
 
-echo "BS4 : " . var_dump($_SESSION["option_bs"]) . "<br>";
-echo "FA : " . var_dump($_SESSION["option_fa"]) . "<br>";
-echo "IMG : " . var_dump($_SESSION["option_img"]) . "<br>";
-echo "Index : " . var_dump($_SESSION["option_index"]) . "<br>";
+// echo "BS4 : " . var_dump($_SESSION["option_bs"]) . "<br>";
+// echo "FA : " . var_dump($_SESSION["option_fa"]) . "<br>";
+// echo "IMG : " . var_dump($_SESSION["option_img"]) . "<br>";
+// echo "Index : " . var_dump($_SESSION["option_index"]) . "<br>";
 
-echo "Noms des tables : " . var_dump($tables_names) . "<br>";
-echo "Columns des tables : " . var_dump($tables_rows) . "<br>";
-echo "Columns des tables SPLITTED : " . var_dump($tables_rows_splitted) . "<br>";*/
+// echo "Noms des tables : " . var_dump($tables_names) . "<br>";
+// echo "Columns des tables : " . var_dump($tables_rows) . "<br>";
+// echo "Columns des tables SPLITTED : " . var_dump($tables_rows_splitted) . "<br>";
 
 
 
@@ -52,9 +52,8 @@ for ($j = 0; $j < sizeof($tables_rows_splitted[$i]); $j++) {
 
 function replaceModel($tableName, $tableRows)
 {
-    $model = file_get_contents("resource/Item.php");
+    $model = file_get_contents("../resource/Item.php");
     $model = str_replace("{{TABLENAME}}", $tableName, $model);
-
 
     $attributes = "`" . $tableRows[0] . "`";
     for ($i = 1; $i < sizeof($tableRows); $i++) {
@@ -74,7 +73,7 @@ function replaceModel($tableName, $tableRows)
     $model = str_replace("{{ATTRIBUTES}}", $attributes, $model);
     $model = str_replace("{{DATAS}}", $datas, $model);
     $model = str_replace("{{BINDVALUES}}", $databinds, $model);
-    echo $model . "<br>";
+    //echo $model . "<br>";
 
     //return $model; 
 }
@@ -106,29 +105,45 @@ function createTemplate()
     mkdir("return/" . $filename . "-" .  $i . "/lib", 0777);
     mkdir("return/" . $filename . "-" .  $i . "/models", 0777);
 
-    file_put_contents("return/" . $filename . "-" .  $i  . "/css/master.css", file_get_contents("resource/master.css"));
+    file_put_contents("return/" . $filename . "-" .  $i  . "/css/master.css", file_get_contents("../resource/master.css"));
 
-    file_put_contents("return/" . $filename . "-" .  $i  . "/js/app.js", file_get_contents("resource/app.js"));
+    file_put_contents("return/" . $filename . "-" .  $i  . "/js/app.js", file_get_contents("../resource/app.js"));
 
-    file_put_contents("return/" . $filename . "-" .  $i  . "/config/pdo_db.php", file_get_contents("resource/pdo_db.php"));
+    file_put_contents("return/" . $filename . "-" .  $i  . "/config/pdo_db.php", file_get_contents("../resource/pdo_db.php"));
 
     $db = file_get_contents("resource/db.php");
     $db = str_replace("{{HOSTNAME}}", $_SESSION["database_hostname"], $db);
     $db = str_replace("{{USERNAME}}", $_SESSION["database_username"], $db);
     $db = str_replace("{{PASSWORD}}", $_SESSION["database_password"], $db);
     $db = str_replace("{{DATABASENAME}}", $_SESSION["database_name"],  $db);
-    file_put_contents("return/" . $filename . "-" .  $i  . "/models/Item.php", file_get_contents("resource/Item.php"));
+    file_put_contents("return/" . $filename . "-" .  $i  . "/models/Item.php", file_get_contents("../resource/Item.php"));
 
 
     
-    $db = file_get_contents("resource/db.php");
+    $db = file_get_contents("../resource/db.php");
     $db = str_replace("{{HOSTNAME}}", $_SESSION["database_hostname"], $db);
     $db = str_replace("{{USERNAME}}", $_SESSION["database_username"], $db);
     $db = str_replace("{{PASSWORD}}", $_SESSION["database_password"], $db);
     $db = str_replace("{{DATABASENAME}}", $_SESSION["database_name"],  $db);
     file_put_contents("return/" . $filename . "-" .  $i  . "/lib/db.php", $db);
 
+    $output = shell_exec("zip -r return/" . $filename . "-" .  $i .".zip return/" . $filename . "-" .  $i ."");
+    echo $output;
 
+    $file = "return/" . $filename . "-" .  $i .".zip";
+
+    if (file_exists($file)) {
+        header('Content-Description: File Transfer');
+        header('Content-Type: application/octet-stream');
+        header('Content-Disposition: attachment; filename="'.basename($file).'"');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate');
+        header('Pragma: public');
+        header('Content-Length: ' . filesize($file));
+        readfile($file);
+        header("Location: thankyou.php");
+        exit;
+    }
 }
 
 createTemplate();
