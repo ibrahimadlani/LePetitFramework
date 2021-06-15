@@ -21,8 +21,6 @@ foreach ($tables_rows as $key) {
 }
 
 
-
-
 // echo "<br>--------------------------<br>";
 // echo "Nom du projet : " . $_SESSION["project_name"] . "<br>";
 // echo "Nombre de table : " . $_SESSION["table_number"] . "<br>";
@@ -40,48 +38,68 @@ foreach ($tables_rows as $key) {
 // echo "Columns des tables : " . var_dump($tables_rows) . "<br>";
 // echo "Columns des tables SPLITTED : " . var_dump($tables_rows_splitted) . "<br>";
 
-
-
-
-
 for ($j = 0; $j < sizeof($tables_rows_splitted[$i]); $j++) {
     $name_of_the_row = $tables_rows_splitted[$i][$j];
 }
 
-
+print_r($tables_names);
+echo "<br></br>"; 
+print_r($tables_rows);
+echo "<br></br>";
+print_r($tables_rows_splitted);
+echo "<br></br>";
+print_r($name_of_the_row);
 
 function replaceModel($tableName, $tableRows)
 {
+//echo $tableName . " et " . $tableRows;
+
     $model = file_get_contents("../resource/Item.php");
     $model = str_replace("{{TABLENAME}}", $tableName, $model);
 
-    $attributes = "`" . $tableRows[0] . "`";
-    for ($i = 1; $i < sizeof($tableRows); $i++) {
-        $attributes = $attributes + ", `" . $tableRows[$i] . "`";
-    }
+    //echo $model;
 
+    $attributes = "`" . $tableRows[0] . "`";
+    
+    for ($i = 1; $i < sizeof($tableRows); $i++) {
+        $attributes = $attributes . ", `" . $tableRows[$i] . "`";
+    }
+    //echo $attributes;
 
     $datas = ":" . $tableRows[0];
     for ($i = 1; $i < sizeof($tableRows); $i++) {
-        $datas = $datas + " , :" . $tableRows[$i];
+        $datas = $datas . " , :" . $tableRows[$i];
     }
+
+    //echo $datas;
 
     $databinds = "";
     for ($i = 1; $i < sizeof($tableRows); $i++) {
-        $databinds = $databinds + '$this->db->bind(": ' . $tableRows[$i] . '" , $data["' . $tableRows[$i] . ']");';;
+        $databinds = $databinds . '$this->db->bind(": ' . $tableRows[$i] . '" , $data["' . $tableRows[$i] . '"]);';
     }
+
     $model = str_replace("{{ATTRIBUTES}}", $attributes, $model);
     $model = str_replace("{{DATAS}}", $datas, $model);
     $model = str_replace("{{BINDVALUES}}", $databinds, $model);
+    //$model = str_replace("{{PHP}}", "<?php", $model);
     //echo $model . "<br>";
+    //echo $model;
 
-    //return $model; 
+    return $model; 
 }
 
-replaceModel($tables_names[0], $tables_rows_splitted[0]);
-function createTemplate()
-{
+//replaceModel($tables_names[0], $tables_rows_splitted[0]);
 
+$models = array();
+for($i = 0; $i < sizeof($tables_names); $i++){
+    array_push($models, replaceModel($tables_names[$i], $tables_rows_splitted[$i]));
+}
+
+//print_r($models);
+
+function createTemplate($models, $tableName)
+{
+    //print_r($models);
 
     /*$db = str_replace("{{HOSTNAME}}", $database_hostname, $db);
     $db = str_replace("{{USERNAME}}", $database_username, $db);
@@ -93,7 +111,6 @@ function createTemplate()
     while (file_exists("return/" . $filename . "-" . $i)) {
         $i = $i + 1;
     }
-
 
     mkdir("return/" . $filename . "-" .  $i, 0777);
     mkdir("return/" . $filename . "-" .  $i . "/img", 0777, true);
@@ -116,9 +133,10 @@ function createTemplate()
     $db = str_replace("{{USERNAME}}", $_SESSION["database_username"], $db);
     $db = str_replace("{{PASSWORD}}", $_SESSION["database_password"], $db);
     $db = str_replace("{{DATABASENAME}}", $_SESSION["database_name"],  $db);
-    file_put_contents("return/" . $filename . "-" .  $i  . "/models/Item.php", file_get_contents("../resource/Item.php"));
 
-
+    for($j = 0; $j < sizeof($tableName); $j++){
+        file_put_contents("return/" . $filename . "-" .  $i  . "/models/". $tableName[$j] .".php", str_replace("{{PHP}}", "<?php", $models[$j]));
+    }
     
     $db = file_get_contents("../resource/db.php");
     $db = str_replace("{{HOSTNAME}}", $_SESSION["database_hostname"], $db);
@@ -127,26 +145,56 @@ function createTemplate()
     $db = str_replace("{{DATABASENAME}}", $_SESSION["database_name"],  $db);
     file_put_contents("return/" . $filename . "-" .  $i  . "/lib/db.php", $db);
 
-    $output = shell_exec("zip -r return/" . $filename . "-" .  $i .".zip return/" . $filename . "-" .  $i ."");
-    echo $output;
+    // Chemin du dossier
+    $rootPath = realpath("return/" . $filename . "-" .  $i);
+
+    // Creation du fichier zip
+    $zip = new ZipArchive();
+    //chemin de l'emplacement du fichier zip
+    $zip->open("return/" . $filename . "-" .  $i .".zip", ZipArchive::CREATE | ZipArchive::OVERWRITE);
+
+    // Creation d'un dossier d'itération recursives
+    /** @var SplFileInfo[] $files */
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($rootPath),
+        RecursiveIteratorIterator::LEAVES_ONLY
+    );
+
+    foreach ($files as $name => $file)
+    {
+        if (!$file->isDir())
+        {
+            // recupère le chemin du fichier en cours
+            $filePath = $file->getRealPath();
+            $relativePath = substr($filePath, strlen($rootPath) + 1);
+
+            // ajoute le fichier dans l'archive
+            $zip->addFile($filePath, $relativePath);
+        }
+    }
+
+    // Fermeture de l'objet pour le créer
+    $zip->close();
+
+    // $output = shell_exec("zip return/" . $filename . "-" .  $i .".zip return/" . $filename . "-" .  $i ."");
+    // echo $output;
 
     $file = "return/" . $filename . "-" .  $i .".zip";
 
-    if (file_exists($file)) {
-        header('Content-Description: File Transfer');
-        header('Content-Type: application/octet-stream');
-        header('Content-Disposition: attachment; filename="'.basename($file).'"');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate');
-        header('Pragma: public');
-        header('Content-Length: ' . filesize($file));
-        readfile($file);
-        header("Location: thankyou.php");
-        exit;
-    }
+    // if (file_exists($file)) {
+    //     header('Content-Description: File Transfer');
+    //     header('Content-Type: application/octet-stream');
+    //     header('Content-Disposition: attachment; filename="'.basename($file).'"');
+    //     header('Expires: 0');
+    //     header('Cache-Control: must-revalidate');
+    //     header('Pragma: public');
+    //     header('Content-Length: ' . filesize($file));
+    //     readfile($file);
+    //     include "../thankyou.php";
+    // }
 }
 
-createTemplate();
+createTemplate($models, $tables_names);
 
 
 

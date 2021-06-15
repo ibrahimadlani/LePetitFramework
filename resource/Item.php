@@ -1,4 +1,4 @@
-<?php
+{{PHP}}
   class {{TABLENAME}} {
     private $db;
 
