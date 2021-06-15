@@ -78,9 +78,24 @@ function replaceModel($tableName, $tableRows)
         $databinds = $databinds . '$this->db->bind(": ' . $tableRows[$i] . '" , $data["' . $tableRows[$i] . '"]);';
     }
 
+    $dataSet = "";
+    for ($i = 0; $i < sizeof($tableRows); $i++) {
+        $dataSet = $dataSet . "`" . $tableRows[$i] . "` = '. $" . $tableRows[$i] . " .'" . ", ";
+    }
+
+    $dataSet = substr($dataSet, 0, -3);
+
+    $dataSetAttributes = "$" . $tableRows[0];
+
+    for ($i = 1; $i < sizeof($tableRows); $i++) {
+        $dataSetAttributes = $dataSetAttributes . ", $" . $tableRows[$i];
+    }
+
     $model = str_replace("{{ATTRIBUTES}}", $attributes, $model);
     $model = str_replace("{{DATAS}}", $datas, $model);
     $model = str_replace("{{BINDVALUES}}", $databinds, $model);
+    $model = str_replace("{{DATASET}}", $dataSet, $model);
+    $model = str_replace("{{DATASETATTRIBUTES}}", $dataSetAttributes, $model);
     //$model = str_replace("{{PHP}}", "<?php", $model);
     //echo $model . "<br>";
     //echo $model;

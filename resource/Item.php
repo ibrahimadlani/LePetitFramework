@@ -42,8 +42,8 @@
       return $results;
     }
 
-    public function update{{TABLENAME}}($id, $attribute1, $attribute2, $attribute3, $attribute4) {
-      $this->db->query('UPDATE `{{TABLENAME}}` SET `attribute1`= ' . $attribute1 . ',`attribute2`= ' . $attribute2 . ',`attribute3`= ' . $attribute3 . ',`attribute4`= ' . $attribute4 . '  WHERE `id` =' . $id);
+    public function update{{TABLENAME}}($id, {{DATASETATTRIBUTES}}) {
+      $this->db->query('UPDATE `{{TABLENAME}}` SET {{DATASET}} 'WHERE `id` =' .$id);
 
       $results = $this->db->resultset();
 
