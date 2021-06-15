@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-
 $tables_names = array();
 $tables_rows = array();
 $tables_rows_splitted = array();
 
+print_r($_SESSION);
 
 foreach ($_POST as $key => $value) {
     if (substr($key, 0, 6) == "tables") {
@@ -19,7 +19,6 @@ foreach ($tables_rows as $key) {
     $oui = explode(";", $key);
     array_push($tables_rows_splitted, $oui);
 }
-
 
 // echo "<br>--------------------------<br>";
 // echo "Nom du projet : " . $_SESSION["project_name"] . "<br>";
@@ -112,7 +111,7 @@ for($i = 0; $i < sizeof($tables_names); $i++){
 
 //print_r($models);
 
-function createTemplate($models, $tableName)
+function createTemplate($models, $tablesName, $tablesRows)
 {
     //print_r($models);
 
@@ -143,14 +142,23 @@ function createTemplate($models, $tableName)
 
     file_put_contents("return/" . $filename . "-" .  $i  . "/config/pdo_db.php", file_get_contents("../resource/pdo_db.php"));
 
-    $db = file_get_contents("resource/db.php");
-    $db = str_replace("{{HOSTNAME}}", $_SESSION["database_hostname"], $db);
-    $db = str_replace("{{USERNAME}}", $_SESSION["database_username"], $db);
-    $db = str_replace("{{PASSWORD}}", $_SESSION["database_password"], $db);
-    $db = str_replace("{{DATABASENAME}}", $_SESSION["database_name"],  $db);
+    for ($j=0; $j < sizeof($tablesName); $j++) { 
 
-    for($j = 0; $j < sizeof($tableName); $j++){
-        file_put_contents("return/" . $filename . "-" .  $i  . "/models/". $tableName[$j] .".php", str_replace("{{PHP}}", "<?php", $models[$j]));
+        $column = "";
+        foreach($tablesRows[$j] as $row){
+            $column .= "<th>$row</th>";
+        }
+
+        $index = file_get_contents("../resource/index.php");
+        $index = str_replace("{{PROJECTTITLE}}", $_SESSION["project_name"], $index);
+        $index = str_replace("{{TABLENAME}}", $tablesName[$j], $index);
+        $index = str_replace("{{COLUMN}}", $column, $index);
+        file_put_contents("return/" . $filename . "-" .  $i  . "/". $tablesName[$j] .".php", $index);
+
+    }
+
+    for($j = 0; $j < sizeof($tablesName); $j++){
+        file_put_contents("return/" . $filename . "-" .  $i  . "/models/". $tablesName[$j] .".php", str_replace("{{PHP}}", "<?php", $models[$j]));
     }
     
     $db = file_get_contents("../resource/db.php");
@@ -209,7 +217,7 @@ function createTemplate($models, $tableName)
     // }
 }
 
-createTemplate($models, $tables_names);
+createTemplate($models, $tables_names, $tables_rows_splitted);
 
 
 
