@@ -1,7 +1,7 @@
 <?php
   require_once('config/db.php');
   require_once('lib/pdo_db.php');
-  require_once('models/Item.php');
+  require_once('models/{{TABLENAME}}.php');
 
   ${{TABLENAME}} = new {{TABLENAME}}();
   $all{{TABLENAME}} = ${{TABLENAME}}->get{{TABLENAME}}();
@@ -24,9 +24,7 @@
     <table class="table table-striped">
       <thead>
         <tr>
-          <th>{{COLUMN}}</th>
-
-          
+           {{COLUMN}}         
         </tr>
       </thead>
       <tbody>

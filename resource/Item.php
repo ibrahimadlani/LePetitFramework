@@ -11,12 +11,7 @@
       $this->db->query('INSERT INTO `{{TABLENAME}}` ({{ATTRIBUTES}}) VALUES({{DATAS}})');
 
       // Bind Values
-      
-
-
       {{BINDVALUES}}
-
-
 
       // Execute
       if($this->db->execute()) {

@@ -148,7 +148,8 @@ function createTemplate($models, $tablesName, $tablesRows)
     for ($j=0; $j < sizeof($tablesName); $j++) { 
         $column = "";
         foreach($tablesRows[$j] as $row){
-            $column .= "<th>$row</th>";
+            $column .= "<th>$row</th>
+            ";
         }
 
         //chaque table a une page php à son nom où sont afficher les données de la table dans un tableau
@@ -167,7 +168,7 @@ function createTemplate($models, $tablesName, $tablesRows)
     //appel fonction création zip
     creationZip("return/" . $filename . $i);
 
-    //telechargement("return/" . $filename . $i .".zip");
+    telechargement("return/" . $filename . $i .".zip");
 
 }
 
